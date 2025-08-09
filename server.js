@@ -7,7 +7,6 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-// Список популярных Emoji для игроков
 const EMOJIS = [
     '😀', '😎', '🤖', '👽', '🦄', '🐉', '🔥', '⚡', '🌟', '💎',
     '🍕', '🍔', '🍟', '🍩', '🍰', '🍭', '🎮', '🎯', '🎪', '🎨',
@@ -42,11 +41,16 @@ class Game {
             name: name,
             x: Math.random() * this.gameWidth,
             y: Math.random() * this.gameHeight,
+            vx: 0,
+            vy: 0,
             size: 20,
             emoji: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
             color: `hsl(${Math.random() * 360}, 70%, 60%)`,
             score: 0,
-            speed: 3
+            speed: 3,
+            acceleration: 0.3,
+            friction: 0.95,
+            trail: []
         };
         this.players.set(socketId, player);
         return player;
@@ -65,15 +69,35 @@ class Game {
         const dy = mouseY - player.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
-        if (distance > 0) {
-            // Нормализуем вектор и применяем скорость
-            const speed = player.speed;
-            player.x += (dx / distance) * speed;
-            player.y += (dy / distance) * speed;
+        if (distance > 5) {
+            // Ускорение в направлении цели (как в Spore)
+            const targetVx = (dx / distance) * player.speed;
+            const targetVy = (dy / distance) * player.speed;
+            
+            player.vx += (targetVx - player.vx) * player.acceleration;
+            player.vy += (targetVy - player.vy) * player.acceleration;
+        } else {
+            // Замедление при приближении к цели
+            player.vx *= player.friction;
+            player.vy *= player.friction;
+        }
 
-            // Ограничиваем движение в пределах игрового поля
-            player.x = Math.max(player.size, Math.min(this.gameWidth - player.size, player.x));
-            player.y = Math.max(player.size, Math.min(this.gameHeight - player.size, player.y));
+        // Применяем трение
+        player.vx *= player.friction;
+        player.vy *= player.friction;
+
+        // Обновляем позицию
+        player.x += player.vx;
+        player.y += player.vy;
+
+        // Ограничиваем движение в пределах игрового поля
+        player.x = Math.max(player.size, Math.min(this.gameWidth - player.size, player.x));
+        player.y = Math.max(player.size, Math.min(this.gameHeight - player.size, player.y));
+
+        // Обновляем след (хвост)
+        player.trail.push({ x: player.x, y: player.y, size: player.size * 0.8 });
+        if (player.trail.length > 15) {
+            player.trail.shift();
         }
     }
 
@@ -97,7 +121,6 @@ class Game {
                     player1.speed = Math.max(1, 3 - player1.size * 0.02);
                     this.food.splice(j, 1);
                     
-                    // Добавляем новую еду
                     this.food.push({
                         x: Math.random() * this.gameWidth,
                         y: Math.random() * this.gameHeight,
@@ -117,22 +140,22 @@ class Game {
                     Math.pow(player1.y - player2.y, 2)
                 );
                 
-                // player1 может съесть player2 если он больше на 20%
                 if (distance < player1.size && player1.size > player2.size * 1.2) {
                     player1.size += player2.size * 0.5;
                     player1.score += player2.score + 100;
-                    player1.emoji = player2.emoji; // Меняем emoji на съеденного игрока
+                    player1.emoji = player2.emoji;
                     player1.speed = Math.max(1, 3 - player1.size * 0.02);
                     
-                    // Воскрешаем съеденного игрока
                     player2.x = Math.random() * this.gameWidth;
                     player2.y = Math.random() * this.gameHeight;
                     player2.size = 20;
                     player2.emoji = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
                     player2.score = 0;
                     player2.speed = 3;
+                    player2.vx = 0;
+                    player2.vy = 0;
+                    player2.trail = [];
                     
-                    // Уведомляем о поедании
                     io.emit('playerEaten', {
                         eater: player1.name,
                         eaten: player2.name,
@@ -173,11 +196,10 @@ io.on('connection', (socket) => {
     });
 });
 
-// Игровой цикл
 setInterval(() => {
     game.checkCollisions();
     io.emit('gameState', game.getState());
-}, 1000 / 60); // 60 FPS
+}, 1000 / 60);
 
 app.use(express.static(path.join(__dirname, 'public')));
 

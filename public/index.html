@@ -14,9 +14,9 @@
 
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             overflow: hidden;
             height: 100vh;
+            background: #001a33;
         }
 
         #startScreen {
@@ -33,37 +33,32 @@
         }
 
         .start-container {
-            background: white;
+            background: linear-gradient(135deg, #0066cc, #004499);
             padding: 40px;
             border-radius: 20px;
             text-align: center;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
             max-width: 400px;
             width: 90%;
+            border: 2px solid #0099ff;
         }
 
         .start-container h1 {
-            color: #333;
+            color: #ffffff;
             margin-bottom: 20px;
             font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         .start-container .emoji-display {
             font-size: 4em;
             margin: 20px 0;
-            animation: bounce 2s infinite;
+            animation: float 3s ease-in-out infinite;
         }
 
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0);
-            }
-            40% {
-                transform: translateY(-10px);
-            }
-            60% {
-                transform: translateY(-5px);
-            }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
         }
 
         .input-group {
@@ -73,37 +68,55 @@
         .input-group input {
             width: 100%;
             padding: 15px;
-            border: 2px solid #ddd;
+            border: 2px solid #0099ff;
             border-radius: 10px;
             font-size: 16px;
             outline: none;
-            transition: border-color 0.3s;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
         }
 
         .input-group input:focus {
-            border-color: #667eea;
+            border-color: #00ccff;
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .start-btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, #0099ff, #00ccff);
             color: white;
             border: none;
             padding: 15px 30px;
             border-radius: 25px;
             font-size: 18px;
             cursor: pointer;
-            transition: transform 0.3s;
+            transition: all 0.3s;
             width: 100%;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
         }
 
         .start-btn:hover {
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 153, 255, 0.4);
         }
 
         #gameCanvas {
-            border: 3px solid #333;
-            background: #f0f0f0;
+            border: 3px solid #0099ff;
             cursor: crosshair;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #backgroundCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
         }
 
         #gameUI {
@@ -113,7 +126,11 @@
             z-index: 100;
             color: white;
             font-size: 18px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #0099ff;
         }
 
         #leaderboard {
@@ -126,12 +143,13 @@
             color: white;
             min-width: 200px;
             z-index: 100;
+            border: 1px solid #0099ff;
         }
 
         #leaderboard h3 {
             margin-bottom: 15px;
             text-align: center;
-            color: #ffd700;
+            color: #00ccff;
         }
 
         .leaderboard-item {
@@ -139,7 +157,7 @@
             justify-content: space-between;
             margin: 5px 0;
             padding: 5px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 153, 255, 0.2);
             border-radius: 5px;
         }
 
@@ -148,7 +166,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             color: white;
             padding: 20px;
             border-radius: 10px;
@@ -156,6 +174,7 @@
             z-index: 200;
             display: none;
             text-align: center;
+            border: 2px solid #00ccff;
         }
 
         .minimap {
@@ -164,8 +183,8 @@
             right: 20px;
             width: 150px;
             height: 150px;
-            border: 2px solid #333;
-            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #0099ff;
+            background: rgba(0, 26, 51, 0.8);
             border-radius: 10px;
             z-index: 100;
         }
@@ -176,18 +195,25 @@
             left: 20px;
             color: white;
             font-size: 14px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #0099ff;
         }
     </style>
 </head>
 <body>
+    <canvas id="backgroundCanvas"></canvas>
+    <canvas id="gameCanvas"></canvas>
+    
     <div id="startScreen">
         <div class="start-container">
-            <h1><i class="fas fa-gamepad"></i> Emoji Battle</h1>
-            <div class="emoji-display">🎮</div>
-            <p style="margin-bottom: 20px; color: #666;">
-                Стань самым большим Emoji на поле!<br>
-                Съедай других игроков и меняй свой Emoji!
+            <h1><i class="fas fa-water"></i> Emoji Ocean</h1>
+            <div class="emoji-display">🌊</div>
+            <p style="margin-bottom: 20px; color: #cce7ff;">
+                Погрузись в океан Emoji!<br>
+                Двигайся как в Spore и поглощай противников!
             </p>
             <div class="input-group">
                 <input type="text" id="playerName" placeholder="Введите ваше имя" maxlength="20">
@@ -211,13 +237,11 @@
 
     <div id="notification"></div>
 
-    <canvas id="gameCanvas" style="display: none;"></canvas>
-    
     <canvas class="minimap" id="minimap" style="display: none;"></canvas>
 
     <div class="game-info" style="display: none;">
         <div><i class="fas fa-mouse"></i> Двигайте мышью для управления</div>
-        <div><i class="fas fa-expand-arrows-alt"></i> Ешьте еду и других игроков</div>
+        <div><i class="fas fa-water"></i> Плавное движение как в Spore</div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -225,6 +249,8 @@
         const socket = io();
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        const bgCanvas = document.getElementById('backgroundCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
         const minimap = document.getElementById('minimap');
         const minimapCtx = minimap.getContext('2d');
 
@@ -233,11 +259,134 @@
         let camera = { x: 0, y: 0 };
         let mouseX = 0;
         let mouseY = 0;
+        let animationTime = 0;
 
-        // Установка размеров холста
+        // Водный эффект фона
+        class WaterEffect {
+            constructor() {
+                this.waves = [];
+                this.bubbles = [];
+                this.particles = [];
+                
+                // Создаем волны
+                for (let i = 0; i < 5; i++) {
+                    this.waves.push({
+                        amplitude: 20 + Math.random() * 30,
+                        frequency: 0.01 + Math.random() * 0.02,
+                        phase: Math.random() * Math.PI * 2,
+                        speed: 0.02 + Math.random() * 0.03,
+                        opacity: 0.1 + Math.random() * 0.2
+                    });
+                }
+                
+                // Создаем пузырьки
+                for (let i = 0; i < 50; i++) {
+                    this.bubbles.push({
+                        x: Math.random() * window.innerWidth,
+                        y: Math.random() * window.innerHeight,
+                        size: 2 + Math.random() * 8,
+                        speed: 0.5 + Math.random() * 2,
+                        opacity: 0.3 + Math.random() * 0.4
+                    });
+                }
+                
+                // Создаем частицы
+                for (let i = 0; i < 30; i++) {
+                    this.particles.push({
+                        x: Math.random() * window.innerWidth,
+                        y: Math.random() * window.innerHeight,
+                        vx: (Math.random() - 0.5) * 0.5,
+                        vy: (Math.random() - 0.5) * 0.5,
+                        size: 1 + Math.random() * 3,
+                        opacity: 0.2 + Math.random() * 0.3
+                    });
+                }
+            }
+
+            update() {
+                // Обновляем пузырьки
+                this.bubbles.forEach(bubble => {
+                    bubble.y -= bubble.speed;
+                    bubble.x += Math.sin(bubble.y * 0.01) * 0.5;
+                    
+                    if (bubble.y < -10) {
+                        bubble.y = window.innerHeight + 10;
+                        bubble.x = Math.random() * window.innerWidth;
+                    }
+                });
+
+                // Обновляем частицы
+                this.particles.forEach(particle => {
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    
+                    if (particle.x < 0) particle.x = window.innerWidth;
+                    if (particle.x > window.innerWidth) particle.x = 0;
+                    if (particle.y < 0) particle.y = window.innerHeight;
+                    if (particle.y > window.innerHeight) particle.y = 0;
+                });
+            }
+
+            render(ctx, time) {
+                // Градиентный фон
+                const gradient = ctx.createLinearGradient(0, 0, 0, window.innerHeight);
+                gradient.addColorStop(0, '#001a33');
+                gradient.addColorStop(0.5, '#003366');
+                gradient.addColorStop(1, '#004080');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+                // Волновые эффекты
+                this.waves.forEach((wave, index) => {
+                    ctx.strokeStyle = `rgba(0, 153, 255, ${wave.opacity})`;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    
+                    for (let x = 0; x < window.innerWidth; x += 5) {
+                        const y = window.innerHeight / 2 + 
+                                Math.sin(x * wave.frequency + time * wave.speed + wave.phase) * wave.amplitude +
+                                Math.sin(x * wave.frequency * 2 + time * wave.speed * 1.5) * wave.amplitude * 0.5;
+                        
+                        if (x === 0) {
+                            ctx.moveTo(x, y);
+                        } else {
+                            ctx.lineTo(x, y);
+                        }
+                    }
+                    ctx.stroke();
+                });
+
+                // Пузырьки
+                this.bubbles.forEach(bubble => {
+                    ctx.fillStyle = `rgba(255, 255, 255, ${bubble.opacity})`;
+                    ctx.beginPath();
+                    ctx.arc(bubble.x, bubble.y, bubble.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Блик на пузырьке
+                    ctx.fillStyle = `rgba(255, 255, 255, ${bubble.opacity * 0.8})`;
+                    ctx.beginPath();
+                    ctx.arc(bubble.x - bubble.size * 0.3, bubble.y - bubble.size * 0.3, bubble.size * 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                // Плавающие частицы
+                this.particles.forEach(particle => {
+                    ctx.fillStyle = `rgba(0, 204, 255, ${particle.opacity})`;
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            }
+        }
+
+        const waterEffect = new WaterEffect();
+
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
         }
 
         window.addEventListener('resize', resizeCanvas);
@@ -260,7 +409,6 @@
             socket.emit('joinGame', name);
         }
 
-        // Обработка движения мыши
         canvas.addEventListener('mousemove', (e) => {
             if (!player) return;
             
@@ -268,7 +416,6 @@
             mouseX = e.clientX - rect.left;
             mouseY = e.clientY - rect.top;
             
-            // Преобразуем координаты мыши в игровые координаты
             const gameMouseX = mouseX + camera.x - canvas.width / 2;
             const gameMouseY = mouseY + camera.y - canvas.height / 2;
             
@@ -278,13 +425,11 @@
             });
         });
 
-        // Получение информации о присоединении к игре
         socket.on('playerJoined', (playerData) => {
             player = playerData;
             document.getElementById('playerNameDisplay').textContent = player.name;
         });
 
-        // Получение состояния игры
         socket.on('gameState', (state) => {
             gameState = state;
             updateCamera();
@@ -292,7 +437,6 @@
             updateUI();
         });
 
-        // Обработка поедания игрока
         socket.on('playerEaten', (data) => {
             showNotification(`${data.eater} (${data.eaterEmoji}) съел ${data.eaten}!`);
         });
@@ -300,7 +444,6 @@
         function updateCamera() {
             if (!player) return;
             
-            // Плавное следование камеры за игроком
             const targetX = player.x;
             const targetY = player.y;
             
@@ -311,12 +454,16 @@
         function render() {
             if (!gameState) return;
 
-            // Очистка холста
-            ctx.fillStyle = '#e8f4f8';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Анимация водного фона
+            animationTime += 0.016;
+            waterEffect.update();
+            waterEffect.render(bgCtx, animationTime);
 
-            // Сетка фона
-            ctx.strokeStyle = '#d0e8f0';
+            // Очистка игрового холста
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Сетка фона с водным эффектом
+            ctx.strokeStyle = 'rgba(0, 153, 255, 0.1)';
             ctx.lineWidth = 1;
             const gridSize = 50;
             
@@ -342,10 +489,16 @@
                 if (screenX > -50 && screenX < canvas.width + 50 && 
                     screenY > -50 && screenY < canvas.height + 50) {
                     
+                    // Свечение еды
+                    ctx.shadowColor = '#00ccff';
+                    ctx.shadowBlur = 10;
+                    
                     ctx.font = `${food.size * 2}px Arial`;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(food.emoji, screenX, screenY);
+                    
+                    ctx.shadowBlur = 0;
                 }
             });
 
@@ -357,20 +510,46 @@
                 if (screenX > -100 && screenX < canvas.width + 100 && 
                     screenY > -100 && screenY < canvas.height + 100) {
                     
+                    // Отрисовка следа (хвоста) как в Spore
+                    if (p.trail && p.trail.length > 1) {
+                        ctx.strokeStyle = p.color;
+                        ctx.lineWidth = p.size * 0.6;
+                        ctx.lineCap = 'round';
+                        ctx.globalAlpha = 0.6;
+                        
+                        ctx.beginPath();
+                        p.trail.forEach((point, index) => {
+                            const trailX = point.x - camera.x + canvas.width / 2;
+                            const trailY = point.y - camera.y + canvas.height / 2;
+                            
+                            if (index === 0) {
+                                ctx.moveTo(trailX, trailY);
+                            } else {
+                                ctx.lineTo(trailX, trailY);
+                            }
+                        });
+                        ctx.stroke();
+                        ctx.globalAlpha = 1;
+                    }
+                    
                     // Тень игрока
-                    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
                     ctx.beginPath();
                     ctx.arc(screenX + 3, screenY + 3, p.size, 0, Math.PI * 2);
                     ctx.fill();
                     
-                    // Основной круг игрока
-                    ctx.fillStyle = p.color;
+                    // Основной круг игрока с градиентом
+                    const gradient = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, p.size);
+                    gradient.addColorStop(0, p.color);
+                    gradient.addColorStop(1, p.color.replace('60%', '40%'));
+                    
+                    ctx.fillStyle = gradient;
                     ctx.beginPath();
                     ctx.arc(screenX, screenY, p.size, 0, Math.PI * 2);
                     ctx.fill();
                     
                     // Граница игрока
-                    ctx.strokeStyle = '#fff';
+                    ctx.strokeStyle = '#ffffff';
                     ctx.lineWidth = 3;
                     ctx.stroke();
                     
@@ -381,14 +560,13 @@
                     ctx.fillText(p.emoji, screenX, screenY);
                     
                     // Имя игрока
-                    ctx.fillStyle = '#333';
+                    ctx.fillStyle = '#ffffff';
                     ctx.font = 'bold 14px Arial';
                     ctx.textAlign = 'center';
                     ctx.fillText(p.name, screenX, screenY + p.size + 20);
                 }
             });
 
-            // Отрисовка миникарты
             renderMinimap();
         }
 
@@ -397,16 +575,14 @@
 
             const scale = 150 / Math.max(gameState.gameWidth, gameState.gameHeight);
             
-            // Очистка миникарты
-            minimapCtx.fillStyle = '#f0f0f0';
+            minimapCtx.fillStyle = 'rgba(0, 26, 51, 0.8)';
             minimapCtx.fillRect(0, 0, 150, 150);
             
-            // Отрисовка игроков на миникарте
             gameState.players.forEach(p => {
                 const x = p.x * scale;
                 const y = p.y * scale;
                 
-                minimapCtx.fillStyle = p.id === player.id ? '#ff0000' : '#333';
+                minimapCtx.fillStyle = p.id === player.id ? '#ff0000' : '#00ccff';
                 minimapCtx.beginPath();
                 minimapCtx.arc(x, y, Math.max(2, p.size * scale), 0, Math.PI * 2);
                 minimapCtx.fill();
@@ -419,7 +595,6 @@
             document.getElementById('score').textContent = player.score;
             document.getElementById('size').textContent = Math.round(player.size);
 
-            // Обновление таблицы лидеров
             const sortedPlayers = gameState.players.sort((a, b) => b.score - a.score);
             const leaderboardList = document.getElementById('leaderboardList');
             
@@ -445,12 +620,22 @@
             }, 3000);
         }
 
-        // Обработка нажатия Enter для начала игры
         document.getElementById('playerName').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 startGame();
             }
         });
+
+        // Анимационный цикл для фона
+        function animate() {
+            if (document.getElementById('gameCanvas').style.display !== 'none') {
+                waterEffect.update();
+                waterEffect.render(bgCtx, animationTime);
+                animationTime += 0.016;
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
     </script>
 </body>
 </html>
